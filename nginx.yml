@@ -1,0 +1,34 @@
+---
+- name: Install and configure nginx
+  hosts: all
+  gather_facts: false
+  become: true
+
+  vars:
+    nginx_port: 8080
+ 
+  tasks:
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: latest
+        update_cache: true  
+  
+    - name: Copy nginx configuration file
+      ansible.builtin.template:
+        src: templates/default.j2
+        dest: /etc/nginx/sites-enabled/default
+      notify: 
+        - Reload nginx
+  
+    - name: Enable nginx
+      ansible.builtin.systemd:
+        name: nginx.service
+        enabled: true
+
+  handlers:
+    - name: Reload nginx
+      ansible.builtin.systemd:
+        name: nginx.service
+        state: reloaded
+...
